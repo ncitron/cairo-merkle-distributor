@@ -1,0 +1,8 @@
+.env
+artifacts
+.pytest_cache
+env
+__pycache__
+accounts.json
+*.accounts.json
+node.json
