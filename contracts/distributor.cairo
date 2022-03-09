@@ -55,7 +55,9 @@ func claim{
 
     # check that proof is valid
     let (root) = merkle_root.read()
+    local root_loc = root
     let (proof_valid) = merkle_verify(leaf, root, proof_len, proof)
+
     assert proof_valid = 1
 
     # mark leaf as claimed

@@ -24,13 +24,33 @@ def verify_merkle_proof(leaf: int, proof: list[int]) -> bool:
     proof = proof[:-1]
     curr = leaf
 
-    for proofElement in proof:
-        if curr < proofElement:
-            curr = pedersen_hash(curr, proofElement)
+    for proof_elem in proof:
+        if curr < proof_elem:
+            curr = pedersen_hash(curr, proof_elem)
         else:
-            curr = pedersen_hash(proofElement, curr)
+            curr = pedersen_hash(proof_elem, curr)
 
     return curr == root
+
+# gets the leaf node for a particular merkle distributor claim
+def get_leaf(recipient, amount):
+    amount_hash = pedersen_hash(amount, 0)
+    leaf = pedersen_hash(recipient, amount_hash)
+    return leaf
+
+# creates the inital merkle leaf values to use
+def get_leaves(recipients: list[int], amounts: list[int]) -> list[tuple[int, int, int]]:
+    values = []
+    for i in range(0, len(recipients)):
+        leaf = get_leaf(recipients[i], amounts[i])
+        value = (leaf, recipients[i], amounts[i])
+        values.append(value)
+
+    if len(values) % 2 != 0:
+        last_value = (0, 0, 0)
+        values.append(last_value)
+
+    return values
 
 def get_next_level(level: list[int]) -> list[int]:
     next_level = []

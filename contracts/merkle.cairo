@@ -2,7 +2,7 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.hash import hash2
-from starkware.cairo.common.math_cmp import is_le
+from starkware.cairo.common.math_cmp import is_le_felt
 
 # verifies a merkle proof
 func merkle_verify{
@@ -40,7 +40,7 @@ func calc_merkle_root{
 
     local node
     local proof_elem = [proof]
-    let (le) = is_le(curr, proof_elem)
+    let (le) = is_le_felt(curr, proof_elem)
     
     if le == 1:
         let (n) = hash2{hash_ptr=pedersen_ptr}(curr, proof_elem)
@@ -49,7 +49,7 @@ func calc_merkle_root{
         let (n) = hash2{hash_ptr=pedersen_ptr}(proof_elem, curr)
         node = n
     end
-    
+
     let (res) = calc_merkle_root(node, proof_len-1, proof+1)
     return (res)
 end
