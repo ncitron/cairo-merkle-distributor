@@ -3,6 +3,7 @@ import pytest
 
 from starkware.starknet.testing.starknet import Starknet
 from merkle_utils import generate_merkle_proof, generate_merkle_root, get_leaves, verify_merkle_proof
+from test_utils import assert_revert
 
 DISTRIBUTOR_FILE = os.path.join("contracts", "distributor.cairo")
 TOKEN_FILE = os.path.join("contracts", "ERC20_mock.cairo")
@@ -46,3 +47,29 @@ async def test_claim():
     final_bal = exec_info.result.amount
     assert final_bal.high == 0
     assert final_bal.low == amount
+
+@pytest.mark.asyncio
+async def test_claim_incorrect_proof():
+    distributor, token = await deploy()
+    leaves = list(map(lambda x: x[0], MERKLE_INFO))
+    proof = generate_merkle_proof(leaves, 0)
+
+    claimer = 0xbadbadbadbad
+    amount = 100000
+    amount_uint = (amount, 0)
+
+    await assert_revert(distributor.claim(claimer, amount_uint, proof).invoke())
+
+@pytest.mark.asyncio
+async def test_claim_twice():
+    distributor, token = await deploy()
+    leaves = list(map(lambda x: x[0], MERKLE_INFO))
+    proof = generate_merkle_proof(leaves, 0)
+
+    claimer = MERKLE_INFO[0][1]
+    amount = MERKLE_INFO[0][2]
+    amount_uint = (amount, 0)
+
+    await distributor.claim(claimer, amount_uint, proof).invoke()
+    await assert_revert(distributor.claim(claimer, amount_uint, proof).invoke())
+
